@@ -1,0 +1,89 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Case 1
+      id: case-1
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Case 1
+        setup-command: ''
+        command: python main.py
+        input: |-
+          251S001
+          Shibu
+          A++
+          99
+          251S055
+          B+
+          251S026
+        expected-output: 'Final Student Records: {''251S005'': {''name'': ''Sameer'',
+          ''grade'': ''A'', ''attendance'': 68}, ''251S055'': {''name'': ''Abdulla'',
+          ''grade'': ''B+'', ''attendance'': 88}, ''251S001'': {''name'': ''Shibu'',
+          ''grade'': ''A++'', ''attendance'': 99}}'
+        comparison-method: contains
+        timeout: 10
+        max-score: 3
+    - name: Case 2
+      id: case-2
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Case 2
+        setup-command: ''
+        command: python main.py
+        input: |-
+          251S010
+          Riya
+          A
+          85
+          251S005
+          A+
+          251S055
+        expected-output: 'Final Student Records: {''251S005'': {''name'': ''Sameer'',
+          ''grade'': ''A+'', ''attendance'': 68}, ''251S026'': {''name'': ''Rahul'',
+          ''grade'': ''C'', ''attendance'': 72}, ''251S010'': {''name'': ''Riya'',
+          ''grade'': ''A'', ''attendance'': 85}}'
+        comparison-method: contains
+        timeout: 10
+        max-score: 3
+    - name: Case 3
+      id: case-3
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Case 3
+        setup-command: ''
+        command: python main.py
+        input: |-
+          251S099
+          Aman
+          C
+          40
+          251S099
+          B
+          251S005
+        expected-output: 'Final Student Records: {''251S026'': {''name'': ''Rahul'',
+          ''grade'': ''C'', ''attendance'': 72}, ''251S055'': {''name'': ''Abdulla'',
+          ''grade'': ''B'', ''attendance'': 88}, ''251S099'': {''name'': ''Aman'',
+          ''grade'': ''B'', ''attendance'': 40}}'
+        comparison-method: contains
+        timeout: 10
+        max-score: 4
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        CASE-1_RESULTS: "${{steps.case-1.outputs.result}}"
+        CASE-2_RESULTS: "${{steps.case-2.outputs.result}}"
+        CASE-3_RESULTS: "${{steps.case-3.outputs.result}}"
+      with:
+        runners: case-1,case-2,case-3
